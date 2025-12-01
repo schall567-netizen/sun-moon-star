@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>해 · 달 · 별 카드게임</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #fdf6e3 0, #f0f4ff 40%, #e7ecf5 100%);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: #222;
+    }
+    .game-container {
+      margin: 24px;
+      max-width: 520px;
+      width: 100%;
+      background: #ffffffdd;
+      backdrop-filter: blur(8px);
+      border-radius: 18px;
+      padding: 16px 16px 24px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.18),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+      position: relative;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-start;
+    }
+    h1 span.logo {
+      font-size: 18px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f97316, #ec4899, #6366f1);
+      color: white;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .top-right-controls {
+      position: absolute;
+      right: 16px;
+      top: 14px;
+      display: flex;
+      gap: 6px;
+    }
+    .btn-mini {
+      border-radius: 999px;
+      border: none;
+      font-size: 11px;
+      padding: 4px 10px;
+      cursor: pointer;
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-mini.practice {
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin: 8px 0 6px;
+      color: #4b5563;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .status-label {
+      font-weight: 600;
+      color: #111827;
+    }
+    .status-dim {
+      opacity: 0.6;
+    }
+    .hearts {
+      color: #ef4444;
+      font-weight: 700;
+    }
+    .zone-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      margin: 10px 4px 4px;
+    }
+    .card-row {
+      display: flex;
+      gap: 6px;
+      min-height: 80px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .card {
+      min-width: 60px;
+      min-height: 80px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      box-sizing: border-box;
+      cursor: pointer;
+      position: relative;
+      background: #f9fafb;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+    }
+    .card.small {
+      min-width: 46px;
+      min-height: 64px;
+      font-size: 16px;
+    }
+    .card.disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+      color: #4b5563;
+    }
+    .card.red {
+      border-color: rgba(248, 113, 113, 0.8);
+      background: radial-gradient(circle at top, #fee2e2, #fef2f2);
+      color: #991b1b;
+    }
+    .card.blue {
+      border-color: rgba(96, 165, 250, 0.8);
+      background: radial-gradient(circle at top, #dbeafe, #eff6ff);
+      color: #1d4ed8;
+    }
+    .card.green {
+      border-color: rgba(52, 211, 153, 0.8);
+      background: radial-gradient(circle at top, #d1fae5, #ecfdf5);
+      color: #047857;
+    }
+    .card.special.sun {
+      background: radial-gradient(circle at top, #facc15, #f97316);
+      color: #fefce8;
+      border-color: rgba(202, 138, 4, 0.9);
+      font-size: 22px;
+    }
+    .card.special.moon {
+      background: radial-gradient(circle at top, #0f172a, #1f2937);
+      color: #e5e7eb;
+      border-color: rgba(148, 163, 184, 0.9);
+      font-size: 22px;
+    }
+    .card.special.star {
+      background: radial-gradient(circle at top, #312e81, #1f2937);
+      color: #facc15;
+      border-color: rgba(129, 140, 248, 0.9);
+      font-size: 22px;
+    }
+    .controls {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(90deg, #6366f1, #0ea5e9);
+      color: white;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+    }
+    button:disabled {
+      opacity: 0.35;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+      filter: none;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.6);
+    }
+    .log {
+      margin-top: 12px;
+      font-size: 12px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid rgba(209, 213, 219, 0.8);
+      max-height: 160px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+    .log-line { margin-bottom: 3px; }
+    .log-line span.tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-right: 4px;
+      color: #6b7280;
+    }
+    .tag-system { color: #6366f1; }
+    .tag-score { color: #0f766e; }
+    .tag-warn { color: #b91c1c; }
+    .score-breakdown {
+      font-size: 11px;
+      margin-top: 4px;
+      color: #4b5563;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      background: #e5e7eb;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+    .pill.bonus { background: #ecfdf5; color: #047857; }
+    .pill.multiplier { background: #fef9c3; color: #92400e; }
+    .hint {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+      text-align: center;
+    }
+    .hint-strong { font-weight: 600; color: #374151; }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="top-right-controls">
+      <button id="practiceEnterBtn" class="btn-mini">연습모드</button>
+      <button id="practiceExitBtn" class="btn-mini practice" style="display:none;">✕ 연습모드 나가기</button>
+    </div>
+
+    <h1>
+      <span class="logo">☀ 🌙 ⭐</span>
+      해 · 달 · 별
+    </h1>
+    <div class="subtitle">숫자·색 시너지로 패턴을 맞추고, 라운드를 올라가는 솔리테어 카드 게임.</div>
+
+    <div class="status-bar">
+      <div><span class="status-label">모드:</span> <span id="modeText">본 게임</span></div>
+      <div><span class="status-label">라운드:</span> <span id="round">1</span></div>
+      <div><span class="status-label">목표 점수:</span> <span id="targetScore">40</span></div>
+      <div><span class="status-label">현재 점수:</span> <span id="currentScore">0</span></div>
+      <div><span class="status-label">하트:</span> <span id="hearts" class="hearts">♥♥♥</span></div>
+    </div>
+
+    <div class="zone-title">필드 (5장 모이면 자동 채점)</div>
+    <div id="field" class="card-row"></div>
+
+    <div class="zone-title">현재 선택 가능한 카드 (3장)</div>
+    <div id="hand" class="card-row"></div>
+
+    <div class="zone-title">특수 카드</div>
+    <div id="specials" class="card-row"></div>
+
+    <div class="controls">
+      <button id="drawBtn">🎴 3장 드로우</button>
+      <button id="resetBtn" class="btn-secondary">🔄 전체 리셋</button>
+    </div>
+    <div class="hint">
+      <span class="hint-strong">TIP.</span> 연습은 오른쪽 위 <b>연습모드</b> 버튼으로, 본 게임은 하트 3개로 시작해 라운드를 계속 올려보세요.
+    </div>
+
+    <div class="zone-title">버려진 카드</div>
+    <div id="discard" class="card-row"></div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    // ---- 상수 & 상태 ----
+    const COLORS = ["red", "blue", "green"];
+    const COLOR_LABEL = { red: "RED", blue: "BLUE", green: "GREEN" };
+    const TARGET_SCORE_BASE = 40;
+
+    // mode: "normal" | "practice"
+    let mode = "normal";
+
+    let round = 1;
+    let hearts = 3;
+    let field = [];
+    let hand = [];
+    let discardPile = [];
+    let specials = [
+      { type: "sun", used: false },
+      { type: "moon", used: false },
+      { type: "star", used: false }
+    ];
+
+    let sunUsedThisRound = false;
+    let awaitingMoonSelection = false;
+    let awaitingStarFieldSelection = false;
+    let awaitingStarColorSelection = null;
+    let drawsThisRound = 0;
+
+    const fieldEl = document.getElementById("field");
+    const handEl = document.getElementById("hand");
+    const specialsEl = document.getElementById("specials");
+    const discardEl = document.getElementById("discard");
+    const drawBtn = document.getElementById("drawBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const roundEl = document.getElementById("round");
+    const targetScoreEl = document.getElementById("targetScore");
+    const currentScoreEl = document.getElementById("currentScore");
+    const heartsEl = document.getElementById("hearts");
+    const logEl = document.getElementById("log");
+    const modeTextEl = document.getElementById("modeText");
+    const practiceEnterBtn = document.getElementById("practiceEnterBtn");
+    const practiceExitBtn = document.getElementById("practiceExitBtn");
+
+    // 연습모드용 고정 패턴
+    const practiceHands = [
+      [
+        { type: "number", value: 3, color: "red" },
+        { type: "number", value: 5, color: "blue" },
+        { type: "number", value: 7, color: "green" },
+      ],
+      [
+        { type: "number", value: 2, color: "red" },
+        { type: "number", value: 4, color: "red" },
+        { type: "number", value: 9, color: "blue" },
+      ],
+      [
+        { type: "number", value: 6, color: "green" },
+        { type: "number", value: 8, color: "green" },
+        { type: "number", value: 1, color: "blue" },
+      ]
+    ];
+    let practiceStep = 0;
+
+    function getRoundConfig(r) {
+      let cfg = {
+        target: TARGET_SCORE_BASE,
+        maxDraws: Infinity,
+        requireCombo: false
+      };
+      if (r === 1) {
+        cfg.target = 40;
+        cfg.maxDraws = Infinity;
+        cfg.requireCombo = false;
+      } else if (r === 2) {
+        cfg.target = 55;
+        cfg.maxDraws = 7;
+        cfg.requireCombo = false;
+      } else if (r === 3) {
+        cfg.target = 65;
+        cfg.maxDraws = 7;
+        cfg.requireCombo = true;
+      } else if (r === 4) {
+        cfg.target = 75;
+        cfg.maxDraws = 6;
+        cfg.requireCombo = true;
+      } else {
+        cfg.target = 80 + (r - 4) * 10;
+        cfg.maxDraws = 6;
+        cfg.requireCombo = true;
+      }
+      return cfg;
+    }
+
+    // ---- 유틸 ----
+    function log(message, tag = "system") {
+      const div = document.createElement("div");
+      div.className = "log-line";
+      const span = document.createElement("span");
+      span.className = "tag " + (tag === "score" ? "tag-score" : tag === "warn" ? "tag-warn" : "tag-system");
+      span.textContent = tag.toUpperCase();
+      div.appendChild(span);
+      div.appendChild(document.createTextNode(message));
+      logEl.prepend(div);
+    }
+
+    function createNumberCard() {
+      const value = Math.floor(Math.random() * 9) + 1;
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      return { type: "number", value, color };
+    }
+
+    function createDeckSample(n) {
+      const arr = [];
+      for (let i = 0; i < n; i++) arr.push(createNumberCard());
+      return arr;
+    }
+
+    // ---- 렌더링 ----
+    function render() {
+      renderField();
+      renderHand();
+      renderSpecials();
+      renderDiscard();
+
+      const scoreResult = calculateFieldScore();
+      currentScoreEl.textContent = scoreResult.total;
+
+      if (mode === "practice") {
+        modeTextEl.textContent = "연습 모드";
+        roundEl.textContent = "-";
+        targetScoreEl.textContent = "-";
+        targetScoreEl.classList.add("status-dim");
+        heartsEl.textContent = "♥♥♥";
+        heartsEl.classList.add("status-dim");
+      } else {
+        const cfg = getRoundConfig(round);
+        modeTextEl.textContent = "본 게임";
+        roundEl.textContent = round;
+        targetScoreEl.textContent = cfg.target;
+        targetScoreEl.classList.remove("status-dim");
+        heartsEl.textContent = "♥".repeat(hearts);
+        heartsEl.classList.remove("status-dim");
+      }
+    }
+
+    function renderField() {
+      fieldEl.innerHTML = "";
+      field.forEach((card, index) => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "card " + (card.type === "number" ? card.color : "");
+        if (card.type === "number") {
+          cardEl.textContent = card.value;
+          const label = document.createElement("div");
+          label.className = "card-label";
+          label.textContent = COLOR_LABEL[card.color];
+          cardEl.appendChild(label);
+        } else {
+          cardEl.textContent = "?";
+        }
+        fieldEl.appendChild(cardEl);
+      });
+
+      for (let i = field.length; i < 5; i++) {
+        const empty = document.createElement("div");
+        empty.className = "card small disabled";
+        empty.style.borderStyle = "dashed";
+        empty.style.background = "transparent";
+        empty.style.boxShadow = "none";
+        empty.textContent = "+";
+        fieldEl.appendChild(empty);
+      }
+    }
+
+    function renderHand() {
+      handEl.innerHTML = "";
+      hand.forEach((card, index) => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "card";
+        if (card.type === "number") {
+          cardEl.classList.add(card.color);
+          cardEl.textContent = card.value;
+          const label = document.createElement("div");
+          label.className = "card-label";
+          label.textContent = COLOR_LABEL[card.color];
+          cardEl.appendChild(label);
+        }
+        cardEl.addEventListener("click", () => onHandCardClick(index));
+        handEl.appendChild(cardEl);
+      });
+
+      if (hand.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = "🎴 ‘3장 드로우’를 눌러 새 카드를 받으세요.";
+        handEl.appendChild(hint);
+      }
+    }
+
+    function renderSpecials() {
+      specialsEl.innerHTML = "";
+      specials.forEach((s, i) => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "card small special " + s.type;
+        const label = document.createElement("div");
+        label.className = "card-label";
+
+        if (s.type === "sun") {
+          cardEl.textContent = "☀";
+          label.textContent = "점수 x2";
+        } else if (s.type === "moon") {
+          cardEl.textContent = "🌙";
+          label.textContent = "버린 카드";
+        } else if (s.type === "star") {
+          cardEl.textContent = "⭐";
+          label.textContent = "색 변경";
+        }
+        cardEl.appendChild(label);
+
+        if (mode === "practice" || s.used) {
+          cardEl.classList.add("disabled");
+        } else {
+          cardEl.addEventListener("click", () => onSpecialClick(i));
+        }
+
+        specialsEl.appendChild(cardEl);
+      });
+
+      if (mode === "practice") {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = "연습모드에서는 해/달/별은 구경만 하고, 본 게임에서 실제로 사용해봐요.";
+        specialsEl.appendChild(hint);
+      }
+    }
+
+    function renderDiscard() {
+      discardEl.innerHTML = "";
+      discardPile.slice(-9).forEach(card => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "card small " + (card.type === "number" ? card.color : "");
+        if (card.type === "number") {
+          cardEl.textContent = card.value;
+          const label = document.createElement("div");
+          label.className = "card-label";
+          label.textContent = COLOR_LABEL[card.color];
+          cardEl.appendChild(label);
+        }
+        cardEl.classList.add("disabled");
+        discardEl.appendChild(cardEl);
+      });
+      if (discardPile.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = mode === "practice"
+          ? "연습 중! 필요 없는 카드는 자동으로 여기에 쌓입니다."
+          : "아직 버려진 카드가 없습니다.";
+        discardEl.appendChild(hint);
+      }
+    }
+
+    // ---- 점수/시너지 계산 ----
+    function calculateFieldScore() {
+      if (field.length === 0) return { total: 0, base: 0, bonuses: [], hadCombo: false };
+
+      const nums = field.filter(c => c.type === "number");
+      const base = nums.reduce((sum, c) => sum + c.value, 0);
+      const colors = nums.map(c => c.color);
+      const values = nums.map(c => c.value).sort((a, b) => a - b);
+
+      const bonuses = [];
+      let score = base;
+      let hadCombo = false;
+
+      // 1) 기존 패턴들
+      if (nums.length === 5 && colors.every(c => c === colors[0])) {
+        score += 20;
+        bonuses.push("단색 5장(Flush) +20");
+        hadCombo = true;
+      }
+
+      if (nums.length === 5) {
+        let isSeq = true;
+        for (let i = 1; i < values.length; i++) {
+          if (values[i] !== values[i - 1] + 1) {
+            isSeq = false;
+            break;
+          }
+        }
+        if (isSeq) {
+          score += 15;
+          bonuses.push("연속 5장(Straight) +15");
+          hadCombo = true;
+        }
+      }
+
+      const uniqueColors = new Set(colors);
+      if (nums.length === 5 && uniqueColors.size === 3) {
+        score += 12;
+        bonuses.push("세 색 모두 다름(무지개) +12");
+        hadCombo = true;
+      }
+
+      if (base >= 35) {
+        score += 10;
+        bonuses.push("숫자 합 35+ +10");
+        hadCombo = true;
+      }
+
+      // 2) 같은 숫자 세트
+      const countByValue = {};
+      nums.forEach(c => {
+        countByValue[c.value] = (countByValue[c.value] || 0) + 1;
+      });
+      Object.entries(countByValue).forEach(([val, cnt]) => {
+        if (cnt >= 2) {
+          let add = 0;
+          let name = "";
+          if (cnt === 2) { add = 5; name = "페어"; }
+          else if (cnt === 3) { add = 12; name = "트리플"; }
+          else if (cnt === 4) { add = 20; name = "포카드"; }
+          else if (cnt === 5) { add = 35; name = "파이브카드"; }
+          score += add;
+          bonuses.push(`같은 숫자 ${cnt}장(${name}) +${add}`);
+          hadCombo = true;
+        }
+      });
+
+      // 3) 인접 같은 색 체인
+      let chainLen = 1;
+      for (let i = 1; i < nums.length; i++) {
+        if (nums[i].color === nums[i - 1].color) {
+          chainLen++;
+        } else {
+          if (chainLen >= 2) {
+            const add = (chainLen - 1) * 3;
+            score += add;
+            bonuses.push(`같은 색 연속 ${chainLen}장 +${add}`);
+            hadCombo = true;
+          }
+          chainLen = 1;
+        }
+      }
+      if (chainLen >= 2) {
+        const add = (chainLen - 1) * 3;
+        score += add;
+        bonuses.push(`같은 색 연속 ${chainLen}장 +${add}`);
+        hadCombo = true;
+      }
+
+      // Sun 배수
+      let multiplier = (sunUsedThisRound && mode === "normal") ? 2 : 1;
+      const total = score * multiplier;
+      if (multiplier > 1) {
+        bonuses.push(`SUN 효과로 점수 x${multiplier}`);
+        hadCombo = true;
+      }
+
+      return { total, base, bonuses, hadCombo };
+    }
+
+    // ---- 인터랙션 ----
+    function onHandCardClick(index) {
+      const card = hand[index];
+
+      if (awaitingMoonSelection) {
+        log("먼저 Moon 효과로 버린 카드에서 선택하세요.", "warn");
+        return;
+      }
+      if (awaitingStarFieldSelection || awaitingStarColorSelection !== null) {
+        log("Star 사용 중입니다. 색 변경을 먼저 완료하세요.", "warn");
+        return;
+      }
+
+      if (card.type === "number") {
+        if (field.length >= 5) {
+          log("필드가 가득 찼습니다.", "warn");
+          return;
+        }
+        field.push(card);
+        hand.forEach((c, i) => { if (i !== index) discardPile.push(c); });
+        hand = [];
+
+        log(`필드에 ${COLOR_LABEL[card.color]} ${card.value} 을(를) 올렸습니다.`, "system");
+        render();
+
+        if (field.length === 5) {
+          if (mode === "practice") {
+            finishPracticeHand();
+          } else {
+            endRound();
+          }
+        }
+      }
+    }
+
+    function onSpecialClick(index) {
+      if (mode === "practice") {
+        log("연습모드에서는 특수 카드를 사용할 수 없습니다.", "system");
+        return;
+      }
+
+      const s = specials[index];
+      if (s.used) return;
+
+      if (s.type === "sun") {
+        if (sunUsedThisRound) {
+          log("이번 라운드에서 이미 Sun을 사용했습니다.", "warn");
+          return;
+        }
+        sunUsedThisRound = true;
+        s.used = true;
+        log("☀ Sun 사용! 이번 라운드 최종 점수가 x2가 됩니다.", "system");
+        render();
+      } else if (s.type === "moon") {
+        if (discardPile.length === 0) {
+          log("버려진 카드가 없어서 Moon을 사용할 수 없습니다.", "warn");
+          return;
+        }
+        awaitingMoonSelection = true;
+        s.used = true;
+        log("🌙 Moon 사용! 버려진 카드 중 1장을 클릭해서 손으로 가져오세요.", "system");
+        showDiscardSelectionForMoon();
+      } else if (s.type === "star") {
+        if (field.length === 0) {
+          log("필드에 카드가 없어 Star를 사용할 수 없습니다.", "warn");
+          return;
+        }
+        awaitingStarFieldSelection = true;
+        s.used = true;
+        log("⭐ Star 사용! 색을 바꿀 필드 카드를 선택하세요.", "system");
+        render();
+      }
+    }
+
+    function showDiscardSelectionForMoon() {
+      discardEl.innerHTML = "";
+      discardPile.forEach((card, idx) => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "card small " + (card.type === "number" ? card.color : "");
+        if (card.type === "number") {
+          cardEl.textContent = card.value;
+          const label = document.createElement("div");
+          label.className = "card-label";
+          label.textContent = COLOR_LABEL[card.color];
+          cardEl.appendChild(label);
+        }
+        cardEl.addEventListener("click", () => {
+          if (!awaitingMoonSelection) return;
+          awaitingMoonSelection = false;
+          const chosen = discardPile.splice(idx, 1)[0];
+          hand.push(chosen);
+          log(`🌙 Moon으로 ${COLOR_LABEL[chosen.color]} ${chosen.value} 을(를) 다시 손에 가져왔습니다.`, "system");
+          render();
+        });
+        discardEl.appendChild(cardEl);
+      });
+    }
+
+    function showColorChoiceOverlay() {
+      const choice = window.prompt("색을 선택하세요: red / blue / green");
+      if (!choice) {
+        log("Star 사용이 취소되었습니다.", "warn");
+        awaitingStarColorSelection = null;
+        render();
+        return;
+      }
+      const trimmed = choice.trim().toLowerCase();
+      if (!["red", "blue", "green"].includes(trimmed)) {
+        log("유효한 색이 아닙니다. Star 사용이 취소되었습니다.", "warn");
+        awaitingStarColorSelection = null;
+        render();
+        return;
+      }
+      const idx = awaitingStarColorSelection;
+      if (idx === null || field[idx].type !== "number") {
+        log("색을 바꿀 수 없는 카드입니다.", "warn");
+        awaitingStarColorSelection = null;
+        render();
+        return;
+      }
+      const beforeColor = field[idx].color;
+      field[idx].color = trimmed;
+      awaitingStarColorSelection = null;
+      log(`⭐ Star! ${COLOR_LABEL[beforeColor]} → ${COLOR_LABEL[trimmed]} 로 색이 변경되었습니다.`, "system");
+      render();
+    }
+
+    // ---- 라운드 종료 / 승부 ----
+    function endRound() {
+      const cfg = getRoundConfig(round);
+      const result = calculateFieldScore();
+
+      const breakdown = document.createElement("div");
+      breakdown.className = "score-breakdown";
+      const basePill = document.createElement("span");
+      basePill.className = "pill";
+      basePill.textContent = `기본 합계 ${result.base}`;
+      breakdown.appendChild(basePill);
+      result.bonuses.forEach(b => {
+        const pill = document.createElement("span");
+        pill.className = "pill bonus";
+        pill.textContent = b;
+        breakdown.appendChild(pill);
+      });
+      logEl.prepend(breakdown);
+
+      let success = false;
+      if (cfg.requireCombo && !result.hadCombo) {
+        log("이 라운드는 최소 1개의 패턴/시너지가 필요합니다!", "warn");
+        success = false;
+      } else if (result.total >= cfg.target) {
+        log(`라운드 클리어! 총 점수 ${result.total} (목표 ${cfg.target})`, "score");
+        success = true;
+      } else {
+        log(`실패... 총 점수 ${result.total} (목표 ${cfg.target})`, "warn");
+        success = false;
+      }
+
+      if (!success) {
+        hearts -= 1;
+        log(`하트를 1개 잃었습니다. (남은 하트: ${hearts})`, "warn");
+        if (hearts <= 0) {
+          log("💀 하트가 모두 소진되었습니다. 게임 오버!", "warn");
+          render();
+          return;
+        }
+      }
+
+      setTimeout(() => startNewRound(success), 400);
+    }
+
+    function finishPracticeHand() {
+      const result = calculateFieldScore();
+      const breakdown = document.createElement("div");
+      breakdown.className = "score-breakdown";
+      const basePill = document.createElement("span");
+      basePill.className = "pill";
+      basePill.textContent = `연습 합계 ${result.base}`;
+      breakdown.appendChild(basePill);
+      result.bonuses.forEach(b => {
+        const pill = document.createElement("span");
+        pill.className = "pill bonus";
+        pill.textContent = b;
+        breakdown.appendChild(pill);
+      });
+      logEl.prepend(breakdown);
+      log(`연습모드 패 완성! 총 점수 ${result.total}점입니다. 다시 시도해볼까요?`, "score");
+
+      // 연습은 그냥 초기화
+      field = [];
+      hand = [];
+      discardPile = [];
+      sunUsedThisRound = false;
+      drawsThisRound = 0;
+      render();
+    }
+
+    function startNewRound(success) {
+      field = [];
+      hand = [];
+      discardPile = [];
+      sunUsedThisRound = false;
+      awaitingMoonSelection = false;
+      awaitingStarFieldSelection = false;
+      awaitingStarColorSelection = null;
+      drawsThisRound = 0;
+
+      if (success) {
+        round += 1;
+        const cfg = getRoundConfig(round);
+        log(`다음 라운드로! 라운드 ${round}, 목표 점수 ${cfg.target}`, "system");
+        if (cfg.maxDraws !== Infinity) {
+          log(`이 라운드의 드로우 제한: ${cfg.maxDraws}번`, "system");
+        }
+        if (cfg.requireCombo) {
+          log("이 라운드는 패턴/시너지(세트, 연속, 단색 등) 최소 1개가 필수입니다.", "system");
+        }
+      } else {
+        const cfg = getRoundConfig(round);
+        log("같은 라운드를 다시 도전합니다.", "system");
+        if (cfg.maxDraws !== Infinity) {
+          log(`이 라운드의 드로우 제한: ${cfg.maxDraws}번`, "system");
+        }
+      }
+
+      specials = [
+        { type: "sun", used: false },
+        { type: "moon", used: false },
+        { type: "star", used: false }
+      ];
+
+      render();
+    }
+
+    // ---- 드로우/리셋/연습모드 ----
+    function drawThree() {
+      if (hand.length > 0) {
+        log("이미 손패가 있습니다. 먼저 손패에서 카드를 선택하세요.", "warn");
+        return;
+      }
+      if (field.length >= 5) {
+        log("필드가 가득 찼습니다.", "warn");
+        return;
+      }
+
+      if (mode === "practice") {
+        const idx = Math.min(practiceHands.length - 1, practiceStep);
+        hand = practiceHands[idx].map(c => ({ ...c }));
+        practiceStep = (practiceStep + 1) % practiceHands.length;
+        log("연습모드: 카드 3장을 드로우했습니다. 마음에 드는 카드 1장을 필드에 올려보세요.", "system");
+      } else {
+        const cfg = getRoundConfig(round);
+        if (drawsThisRound >= cfg.maxDraws) {
+          log(`이 라운드에서 사용할 수 있는 드로우(${cfg.maxDraws})를 모두 사용했습니다.`, "warn");
+          return;
+        }
+        hand = createDeckSample(3);
+        drawsThisRound++;
+        log(`새 카드 3장을 드로우했습니다. (이번 라운드 드로우 ${drawsThisRound}/${cfg.maxDraws === Infinity ? "∞" : cfg.maxDraws})`, "system");
+      }
+
+      render();
+    }
+
+    function resetGame() {
+      mode = "normal";
+      round = 1;
+      hearts = 3;
+      field = [];
+      hand = [];
+      discardPile = [];
+      sunUsedThisRound = false;
+      awaitingMoonSelection = false;
+      awaitingStarFieldSelection = false;
+      awaitingStarColorSelection = null;
+      drawsThisRound = 0;
+      specials = [
+        { type: "sun", used: false },
+        { type: "moon", used: false },
+        { type: "star", used: false }
+      ];
+      practiceEnterBtn.style.display = "inline-flex";
+      practiceExitBtn.style.display = "none";
+      log("게임이 리셋되었습니다. 라운드 1부터 다시 시작합니다.", "system");
+      render();
+    }
+
+    function enterPractice() {
+      if (mode === "practice") return;
+      mode = "practice";
+      field = [];
+      hand = [];
+      discardPile = [];
+      sunUsedThisRound = false;
+      drawsThisRound = 0;
+      awaitingMoonSelection = false;
+      awaitingStarFieldSelection = false;
+      awaitingStarColorSelection = null;
+      practiceEnterBtn.style.display = "none";
+      practiceExitBtn.style.display = "inline-flex";
+      log("연습모드에 들어왔습니다. 하트/라운드 소모 없이 마음껏 연습해보세요.", "system");
+      render();
+    }
+
+    function exitPractice() {
+      if (mode !== "practice") return;
+      mode = "normal";
+      field = [];
+      hand = [];
+      discardPile = [];
+      sunUsedThisRound = false;
+      drawsThisRound = 0;
+      awaitingMoonSelection = false;
+      awaitingStarFieldSelection = false;
+      awaitingStarColorSelection = null;
+      practiceEnterBtn.style.display = "inline-flex";
+      practiceExitBtn.style.display = "none";
+      log("연습모드를 종료하고 본 게임으로 돌아왔습니다.", "system");
+      render();
+    }
+
+    // ---- 이벤트 바인딩 ----
+    drawBtn.addEventListener("click", drawThree);
+    resetBtn.addEventListener("click", resetGame);
+    practiceEnterBtn.addEventListener("click", enterPractice);
+    practiceExitBtn.addEventListener("click", exitPractice);
+
+    // 초기 시작
+    render();
+    log("본 게임 시작! 먼저 라운드 1에서 감을 잡아보고, 필요하면 오른쪽 위 '연습모드'에서 패턴을 연습해보세요.", "system");
+  </script>
+</body>
+</html>
